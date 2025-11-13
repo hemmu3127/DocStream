@@ -28,5 +28,5 @@ The project is organized into a modular structure to ensure maintainability and 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd pdf_toolkit
+git clone https://github.com/hemmu3127/DocStream.git
+cd pdf_tool
