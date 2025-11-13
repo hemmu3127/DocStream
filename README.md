@@ -29,4 +29,16 @@ The project is organized into a modular structure to ensure maintainability and 
 
 ```bash
 git clone <your-repo-url>
-cd pdf_toolkit
+cd pdf_tool
+```
+
+### 2. Install the requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the Streamlit app 
+```bash
+streamlit run app.py
+```
