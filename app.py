@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Import core processing functions
 from core.image_processing import convert_images_to_pdf
-from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf  # <-- Updated import
+from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf  
 from core.security import encrypt_pdf, decrypt_pdf
 
 # Import logger
