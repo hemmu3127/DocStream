@@ -7,6 +7,7 @@ A production-grade Streamlit application for common PDF manipulation tasks, incl
 - **Convert Images to PDF**: Upload multiple PNG or JPEG files and convert them into a single, multi-page PDF.
 - **Merge PDFs**: Combine several PDF documents into one.
 - **Compress PDF**: Reduce the file size of a PDF using lossless compression.
+- **Secure PDF**: Encrypt your PDFs with a password or decrypt protected files.
 
 ## Project Structure
 
