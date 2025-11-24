@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 # Import core processing functions
 from core.image_processing import convert_images_to_pdf
 from core.pdf_processing import merge_pdfs, compress_pdf  # <-- Updated import
+from core.security import encrypt_pdf, decrypt_pdf
 
 # Import logger
 from utils.logger import log
@@ -29,7 +30,7 @@ st.markdown("Your one-stop, production-grade solution for common PDF tasks.")
 st.sidebar.title("Features")
 app_mode = st.sidebar.selectbox(
     "Choose the feature you want to use",
-    ["Convert Images to PDF", "Merge PDFs", "Compress PDF"]
+    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Secure PDF"]
 )
 
 if app_mode == "Convert Images to PDF":
@@ -131,3 +132,51 @@ elif app_mode == "Compress PDF":
                 except Exception as e:
                     st.error(f"An error occurred during compression: {e}")
                     log.error(f"PDF compression failed: {e}", exc_info=True)
+
+elif app_mode == "Secure PDF":
+    st.header("Secure PDF")
+    st.info("Encrypt or Decrypt your PDF files.")
+    
+    action = st.radio("Choose Action", ["Encrypt", "Decrypt"])
+    
+    if action == "Encrypt":
+        st.subheader("Encrypt PDF")
+        uploaded_pdf = st.file_uploader("Upload PDF to Encrypt", type="pdf")
+        password = st.text_input("Enter Password", type="password")
+        
+        if uploaded_pdf and password:
+            if st.button("Encrypt PDF", type="primary"):
+                with st.spinner("Encrypting..."):
+                    try:
+                        encrypted_pdf = encrypt_pdf(uploaded_pdf, password)
+                        st.success("✅ PDF Encrypted Successfully!")
+                        st.download_button(
+                            label="📥 Download Encrypted PDF",
+                            data=encrypted_pdf,
+                            file_name=f"encrypted_{uploaded_pdf.name}",
+                            mime="application/pdf"
+                        )
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+                        log.error(f"Encryption failed: {e}")
+                        
+    elif action == "Decrypt":
+        st.subheader("Decrypt PDF")
+        uploaded_pdf = st.file_uploader("Upload Encrypted PDF", type="pdf")
+        password = st.text_input("Enter Password", type="password")
+        
+        if uploaded_pdf and password:
+            if st.button("Decrypt PDF", type="primary"):
+                with st.spinner("Decrypting..."):
+                    try:
+                        decrypted_pdf = decrypt_pdf(uploaded_pdf, password)
+                        st.success("✅ PDF Decrypted Successfully!")
+                        st.download_button(
+                            label="📥 Download Decrypted PDF",
+                            data=decrypted_pdf,
+                            file_name=f"decrypted_{uploaded_pdf.name}",
+                            mime="application/pdf"
+                        )
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+                        log.error(f"Decryption failed: {e}")
