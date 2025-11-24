@@ -1,4 +1,23 @@
-# PDF Pro Toolkit
+# PDF Pro Toolkit 🚀
+
+A production-grade Streamlit application for common PDF manipulation tasks.
+
+
+## 🌟 Live Demo
+
+Try the app instantly here: **[https://docstream.streamlit.app/](https://docstream.streamlit.app/)**
+
+## ✨ Features
+
+- **Convert Images to PDF**: Upload multiple PNG or JPEG files and convert them into a single, multi-page PDF.
+- **Merge PDFs**: Combine several PDF documents into one.
+- **Compress PDF**: Reduce the file size of a PDF using lossless compression.
+- **Split PDF**: Extract specific pages or ranges (e.g., "1, 3-5") from a PDF.
+- **Secure PDF**: Encrypt your PDFs with a password or decrypt protected files.
+
+## 📂 Project Structure
+
+The project is organized into a modular structure to ensure maintainability and scalability:
 
 - `app.py`: The main entry point for the Streamlit application (UI layer).
 - `core/`: Contains the core business logic for PDF and image processing.
@@ -6,7 +25,7 @@
 - `requirements.txt`: A list of all Python dependencies with pinned versions.
 - `.env`: A configuration file for environment-specific variables.
 
-## Setup and Installation
+## 🛠️ Setup and Installation
 
 ### Prerequisites
 
@@ -27,6 +46,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. Run the Streamlit app 
+
 ```bash
 streamlit run app.py
 ```
