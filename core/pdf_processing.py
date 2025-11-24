@@ -114,3 +114,56 @@ def compress_pdf(pdf_file: UploadedFile, quality: int) -> io.BytesIO:
     
     log.info("Successfully completed PDF compression.")
     return compressed_bytes
+
+
+def split_pdf(pdf_file: UploadedFile, page_range: str) -> io.BytesIO:
+    """
+    Splits a PDF file based on the provided page range string.
+    
+    Args:
+        pdf_file: The uploaded PDF file.
+        page_range: A string representing pages to keep (e.g., "1, 3-5, 8").
+                    Pages are 1-indexed.
+                    
+    Returns:
+        A BytesIO object containing the split PDF data.
+    """
+    log.info(f"Starting PDF split with range: {page_range}")
+    pdf_file.seek(0)
+    reader = PdfReader(pdf_file)
+    writer = PdfWriter()
+    
+    total_pages = len(reader.pages)
+    selected_pages = set()
+    
+    # Parse the page range string
+    try:
+        parts = [p.strip() for p in page_range.split(',')]
+        for part in parts:
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                # Handle range (inclusive, 1-based to 0-based)
+                for i in range(start - 1, end):
+                    selected_pages.add(i)
+            else:
+                # Handle single page
+                selected_pages.add(int(part) - 1)
+    except ValueError:
+        raise ValueError("Invalid page range format. Use numbers and ranges like '1, 3-5'.")
+        
+    # Sort pages to maintain order
+    sorted_pages = sorted(list(selected_pages))
+    
+    # Validate and add pages
+    for page_num in sorted_pages:
+        if 0 <= page_num < total_pages:
+            writer.add_page(reader.pages[page_num])
+        else:
+            log.warning(f"Page {page_num + 1} is out of range (Total: {total_pages}). Skipping.")
+            
+    output_stream = io.BytesIO()
+    writer.write(output_stream)
+    output_stream.seek(0)
+    
+    log.info(f"Successfully split PDF. Extracted {len(writer.pages)} pages.")
+    return output_stream

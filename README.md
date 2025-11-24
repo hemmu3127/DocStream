@@ -1,18 +1,5 @@
 # PDF Pro Toolkit
 
-A production-grade Streamlit application for common PDF manipulation tasks, including image-to-PDF conversion, PDF merging, and PDF compression.
-
-## Features
-
-- **Convert Images to PDF**: Upload multiple PNG or JPEG files and convert them into a single, multi-page PDF.
-- **Merge PDFs**: Combine several PDF documents into one.
-- **Compress PDF**: Reduce the file size of a PDF using lossless compression.
-- **Secure PDF**: Encrypt your PDFs with a password or decrypt protected files.
-
-## Project Structure
-
-The project is organized into a modular structure to ensure maintainability and scalability:
-
 - `app.py`: The main entry point for the Streamlit application (UI layer).
 - `core/`: Contains the core business logic for PDF and image processing.
 - `utils/`: Includes utility modules like the centralized logger.

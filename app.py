@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Import core processing functions
 from core.image_processing import convert_images_to_pdf
-from core.pdf_processing import merge_pdfs, compress_pdf  # <-- Updated import
+from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf  # <-- Updated import
 from core.security import encrypt_pdf, decrypt_pdf
 
 # Import logger
@@ -30,7 +30,7 @@ st.markdown("Your one-stop, production-grade solution for common PDF tasks.")
 st.sidebar.title("Features")
 app_mode = st.sidebar.selectbox(
     "Choose the feature you want to use",
-    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Secure PDF"]
+    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Split PDF","Secure PDF"]
 )
 
 if app_mode == "Convert Images to PDF":
@@ -132,6 +132,34 @@ elif app_mode == "Compress PDF":
                 except Exception as e:
                     st.error(f"An error occurred during compression: {e}")
                     log.error(f"PDF compression failed: {e}", exc_info=True)
+
+elif app_mode == "Split PDF":
+    st.header("Split PDF")
+    st.info("Extract specific pages from your PDF.")
+    
+    uploaded_pdf = st.file_uploader("Upload PDF to Split", type="pdf")
+    
+    if uploaded_pdf:
+        st.write("Enter page numbers and/or ranges separated by commas (e.g., '1, 3-5, 8').")
+        page_range = st.text_input("Page Range", placeholder="1, 3-5")
+        
+        if page_range:
+            if st.button("Split PDF", type="primary"):
+                with st.spinner("Splitting PDF..."):
+                    try:
+                        split_pdf_bytes = split_pdf(uploaded_pdf, page_range)
+                        st.success("✅ PDF Split Successfully!")
+                        st.download_button(
+                            label="📥 Download Split PDF",
+                            data=split_pdf_bytes,
+                            file_name=f"split_{uploaded_pdf.name}",
+                            mime="application/pdf"
+                        )
+                    except ValueError as ve:
+                        st.error(f"Invalid input: {ve}")
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+                        log.error(f"Split failed: {e}")
 
 elif app_mode == "Secure PDF":
     st.header("Secure PDF")
