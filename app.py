@@ -23,7 +23,7 @@ st.set_page_config(
 )
 
 # --- Main Application UI ---
-st.title(os.getenv("APP_TITLE"))
+st.title(os.getenv("APP_TITLE", "PDF Toolkit"))
 st.markdown("Your one-stop, production-grade solution for common PDF tasks.")
 
 # --- Sidebar for Navigation ---
