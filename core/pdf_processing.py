@@ -116,6 +116,28 @@ def compress_pdf(pdf_file: UploadedFile, quality: int) -> io.BytesIO:
     return compressed_bytes
 
 
+def _parse_page_range(page_range: str, total_pages: int) -> set:
+    """
+    Parses a page range string and returns a set of 0-indexed page numbers.
+    """
+    selected_pages = set()
+    try:
+        parts = [p.strip() for p in page_range.split(',')]
+        for part in parts:
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                # Handle range (inclusive, 1-based to 0-based)
+                for i in range(start - 1, end):
+                    selected_pages.add(i)
+            else:
+                # Handle single page
+                selected_pages.add(int(part) - 1)
+    except ValueError:
+        raise ValueError("Invalid page range format. Use numbers and ranges like '1, 3-5'.")
+    
+    return selected_pages
+
+
 def split_pdf(pdf_file: UploadedFile, page_range: str) -> io.BytesIO:
     """
     Splits a PDF file based on the provided page range string.
@@ -134,22 +156,9 @@ def split_pdf(pdf_file: UploadedFile, page_range: str) -> io.BytesIO:
     writer = PdfWriter()
     
     total_pages = len(reader.pages)
-    selected_pages = set()
     
     # Parse the page range string
-    try:
-        parts = [p.strip() for p in page_range.split(',')]
-        for part in parts:
-            if '-' in part:
-                start, end = map(int, part.split('-'))
-                # Handle range (inclusive, 1-based to 0-based)
-                for i in range(start - 1, end):
-                    selected_pages.add(i)
-            else:
-                # Handle single page
-                selected_pages.add(int(part) - 1)
-    except ValueError:
-        raise ValueError("Invalid page range format. Use numbers and ranges like '1, 3-5'.")
+    selected_pages = _parse_page_range(page_range, total_pages)
         
     # Sort pages to maintain order
     sorted_pages = sorted(list(selected_pages))
@@ -166,4 +175,42 @@ def split_pdf(pdf_file: UploadedFile, page_range: str) -> io.BytesIO:
     output_stream.seek(0)
     
     log.info(f"Successfully split PDF. Extracted {len(writer.pages)} pages.")
+    return output_stream
+
+
+def rotate_pdf_pages(pdf_file: UploadedFile, rotation: int, page_range: str = None) -> io.BytesIO:
+    """
+    Rotates pages in a PDF file by the specified angle.
+
+    Args:
+        pdf_file: The uploaded PDF file.
+        rotation: The angle to rotate (90, 180, 270).
+        page_range: Optional string representing specific pages to rotate. 
+                    If None, all pages are rotated.
+
+    Returns:
+        A BytesIO object containing the rotated PDF data.
+    """
+    log.info(f"Starting PDF rotation by {rotation} degrees. Range: {page_range if page_range else 'All'}")
+    pdf_file.seek(0)
+    reader = PdfReader(pdf_file)
+    writer = PdfWriter()
+    
+    total_pages = len(reader.pages)
+    pages_to_rotate = set()
+    
+    if page_range:
+        pages_to_rotate = _parse_page_range(page_range, total_pages)
+    
+    for i, page in enumerate(reader.pages):
+        writer.add_page(page)
+        # Rotate if no range specified (all pages) OR if current page is in the target set
+        if not page_range or i in pages_to_rotate:
+            writer.pages[-1].rotate(rotation)
+
+    output_stream = io.BytesIO()
+    writer.write(output_stream)
+    output_stream.seek(0)
+
+    log.info("Successfully completed PDF rotation.")
     return output_stream

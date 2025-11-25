@@ -13,6 +13,7 @@ Try the app instantly here: **[https://docstream.streamlit.app/](https://docstre
 - **Merge PDFs**: Combine several PDF documents into one.
 - **Compress PDF**: Reduce the file size of a PDF using lossless compression.
 - **Split PDF**: Extract specific pages or ranges (e.g., "1, 3-5") from a PDF.
+- **Rotate PDF**: Rotate all pages or specific pages (e.g., "1, 3-5") in your PDF document by 90, 180, or 270 degrees.
 - **Secure PDF**: Encrypt your PDFs with a password or decrypt protected files.
 
 ## 📂 Project Structure

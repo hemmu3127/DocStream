@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Import core processing functions
 from core.image_processing import convert_images_to_pdf
-from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf  
+from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf, rotate_pdf_pages
 from core.security import encrypt_pdf, decrypt_pdf
 
 # Import logger
@@ -30,7 +30,7 @@ st.markdown("Your one-stop, production-grade solution for common PDF tasks.")
 st.sidebar.title("Features")
 app_mode = st.sidebar.selectbox(
     "Choose the feature you want to use",
-    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Split PDF","Secure PDF"]
+    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Split PDF", "Rotate PDF", "Secure PDF"]
 )
 
 if app_mode == "Convert Images to PDF":
@@ -160,6 +160,46 @@ elif app_mode == "Split PDF":
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
                         log.error(f"Split failed: {e}")
+
+elif app_mode == "Rotate PDF":
+    st.header("Rotate PDF Pages")
+    st.info("Rotate pages in your PDF document.")
+
+    uploaded_pdf = st.file_uploader("Upload PDF to Rotate", type="pdf")
+
+    if uploaded_pdf:
+        rotation = st.selectbox(
+            "Rotation Angle (Clockwise)",
+            options=[90, 180, 270],
+            format_func=lambda x: f"{x} degrees"
+        )
+        
+        rotation_scope = st.radio("Rotate Pages", ["All Pages", "Specific Pages"])
+        page_range = None
+        
+        if rotation_scope == "Specific Pages":
+            st.write("Enter page numbers and/or ranges separated by commas (e.g., '1, 3-5, 8').")
+            page_range = st.text_input("Page Range (Rotation)", placeholder="1, 3-5")
+
+        if st.button("Rotate PDF", type="primary"):
+            if rotation_scope == "Specific Pages" and not page_range:
+                st.warning("⚠️ Please enter a page range.")
+            else:
+                with st.spinner("Rotating PDF..."):
+                    try:
+                        rotated_pdf = rotate_pdf_pages(uploaded_pdf, rotation, page_range)
+                        st.success("✅ PDF Rotated Successfully!")
+                        st.download_button(
+                            label="📥 Download Rotated PDF",
+                            data=rotated_pdf,
+                            file_name=f"rotated_{uploaded_pdf.name}",
+                            mime="application/pdf"
+                        )
+                    except ValueError as ve:
+                        st.error(f"Invalid input: {ve}")
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+                        log.error(f"Rotation failed: {e}")
 
 elif app_mode == "Secure PDF":
     st.header("Secure PDF")
