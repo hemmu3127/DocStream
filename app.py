@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Import core processing functions
 from core.image_processing import convert_images_to_pdf
-from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf, rotate_pdf_pages
+from core.pdf_processing import merge_pdfs, compress_pdf, split_pdf, rotate_pdf_pages, convert_pdf_to_images
 from core.security import encrypt_pdf, decrypt_pdf
 
 # Import logger
@@ -30,7 +30,7 @@ st.markdown("Your one-stop, production-grade solution for common PDF tasks.")
 st.sidebar.title("Features")
 app_mode = st.sidebar.selectbox(
     "Choose the feature you want to use",
-    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Split PDF", "Rotate PDF", "Secure PDF"]
+    ["Convert Images to PDF", "Merge PDFs", "Compress PDF", "Split PDF", "Rotate PDF", "PDF to Images", "Secure PDF"]
 )
 
 if app_mode == "Convert Images to PDF":
@@ -248,3 +248,33 @@ elif app_mode == "Secure PDF":
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
                         log.error(f"Decryption failed: {e}")
+
+elif app_mode == "PDF to Images":
+    st.header("Convert PDF to Images")
+    st.info("Convert PDF pages into PNG or JPEG images.")
+    
+    uploaded_pdf = st.file_uploader("Upload PDF", type="pdf")
+    
+    if uploaded_pdf:
+        output_format = st.radio("Output Format", ["PNG", "JPEG"])
+        
+        if st.button("Convert to Images", type="primary"):
+            with st.spinner("Converting PDF to images..."):
+                try:
+                    result_bytes = convert_pdf_to_images(uploaded_pdf, output_format)
+                    
+                    # Determine file extension and name
+                    is_zip = result_bytes.getvalue().startswith(b'PK')
+                    file_ext = "zip" if is_zip else output_format.lower()
+                    mime_type = "application/zip" if is_zip else f"image/{output_format.lower()}"
+                    
+                    st.success("✅ PDF Converted Successfully!")
+                    st.download_button(
+                        label=f"📥 Download {file_ext.upper()}",
+                        data=result_bytes,
+                        file_name=f"converted_images.{file_ext}",
+                        mime=mime_type
+                    )
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
+                    log.error(f"PDF to Image conversion failed: {e}")

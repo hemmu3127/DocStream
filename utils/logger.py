@@ -36,6 +36,11 @@ def setup_logger():
     
     logger.addHandler(stream_handler)
     
+    # Create a handler to write logs to a file
+    file_handler = logging.FileHandler("app.log")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
     return logger
 
 # Initialize the logger once

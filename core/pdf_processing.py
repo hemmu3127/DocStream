@@ -207,10 +207,66 @@ def rotate_pdf_pages(pdf_file: UploadedFile, rotation: int, page_range: str = No
         # Rotate if no range specified (all pages) OR if current page is in the target set
         if not page_range or i in pages_to_rotate:
             writer.pages[-1].rotate(rotation)
-
     output_stream = io.BytesIO()
     writer.write(output_stream)
     output_stream.seek(0)
 
     log.info("Successfully completed PDF rotation.")
+    return output_stream
+
+
+def convert_pdf_to_images(pdf_file: UploadedFile, output_format: str = "PNG") -> io.BytesIO:
+    """
+    Converts pages of a PDF file into images.
+
+    Args:
+        pdf_file: The uploaded PDF file.
+        output_format: The desired image format ("PNG" or "JPEG").
+
+    Returns:
+        io.BytesIO: A Zip file containing images if multiple pages, 
+                    or a single image file if only one page.
+    """
+    import fitz  # PyMuPDF
+    import zipfile
+    
+    log.info(f"Starting PDF to Image conversion. Format: {output_format}")
+    
+    # Save uploaded file to a temporary file because fitz needs a file path or bytes
+    # Using bytes directly with fitz.open("pdf", bytes)
+    pdf_file.seek(0)
+    pdf_bytes = pdf_file.read()
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    
+    output_stream = io.BytesIO()
+    
+    # Set zoom factor for 300 DPI (default is 72 DPI)
+    zoom = 300 / 72
+    mat = fitz.Matrix(zoom, zoom)
+    
+    # If single page, return just the image
+    if len(doc) == 1:
+        page = doc.load_page(0)
+        pix = page.get_pixmap(matrix=mat)
+        
+        img_data = pix.tobytes(output_format.lower())
+        output_stream.write(img_data)
+        output_stream.seek(0)
+        log.info("Converted single page PDF to high-quality image.")
+        return output_stream
+    
+    # If multiple pages, return a zip
+    with zipfile.ZipFile(output_stream, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i, page in enumerate(doc):
+            pix = page.get_pixmap(matrix=mat)
+            img_data = pix.tobytes(output_format.lower())
+            
+            # Define filename in zip
+            ext = output_format.lower()
+            filename = f"page_{i+1}.{ext}"
+            
+            zf.writestr(filename, img_data)
+            
+    output_stream.seek(0)
+    log.info(f"Converted {len(doc)} pages to high-quality images in a ZIP archive.")
     return output_stream
